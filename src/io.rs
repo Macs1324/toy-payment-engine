@@ -1,6 +1,5 @@
 use crate::{
     ClientId,
-    client::ClientData,
     error::PaymentError,
     event::{DisputeData, DisputeEvent, Event, TransactionData, TransactionEvent, TransactionId},
 };

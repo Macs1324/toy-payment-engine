@@ -34,7 +34,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let clients = state.dump_clients();
 
-    std::io::stdout().write("client,available,held,total,locked\n".as_bytes());
+    std::io::stdout().write_all("client,available,held,total,locked\n".as_bytes())?;
     for client in clients {
         std::io::stdout().write_fmt(format_args!(
             "{},{},{},{},{}\n",
@@ -43,9 +43,9 @@ fn main() -> Result<(), Box<dyn Error>> {
             client.held_amount(),
             client.total_amount(),
             client.is_locked()
-        ));
+        ))?;
     }
-    std::io::stdout().flush();
+    std::io::stdout().flush()?;
 
     Ok(())
 }
