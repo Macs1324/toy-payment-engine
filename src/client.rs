@@ -1,11 +1,13 @@
 use std::collections::HashSet;
 
+use crate::ClientId;
 use crate::error::Result;
 use crate::event::{DisputeEvent, Event, TransactionEvent, TransactionId};
 use crate::state::TransactionHistory;
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone)]
 pub struct ClientData {
+    id: ClientId,
     available: f32,
     held: f32,
     locked: bool,
@@ -15,13 +17,34 @@ pub struct ClientData {
 }
 
 impl ClientData {
-    pub fn new() -> ClientData {
+    pub fn new(id: ClientId) -> ClientData {
         Self {
+            id,
             available: 0.0f32,
             held: 0.0f32,
             locked: false,
             disputed_transactions: HashSet::new(),
         }
+    }
+
+    pub fn id(&self) -> ClientId {
+        self.id
+    }
+
+    pub fn available_amount(&self) -> f32 {
+        self.available
+    }
+
+    pub fn held_amount(&self) -> f32 {
+        self.held
+    }
+
+    pub fn total_amount(&self) -> f32 {
+        self.available + self.held
+    }
+
+    pub fn is_locked(&self) -> bool {
+        self.locked
     }
 
     pub fn apply_event(&mut self, event: &Event, history: &TransactionHistory) -> Result<()> {
@@ -36,7 +59,9 @@ impl ClientData {
                     self.available += data.amount;
                 }
                 TransactionEvent::Withdrawal(data) => {
-                    self.available -= data.amount;
+                    if self.available >= data.amount {
+                        self.available -= data.amount;
+                    }
                 }
             },
             Event::DisputeRef(dp) => match dp {
@@ -56,11 +81,12 @@ impl ClientData {
                 DisputeEvent::Resolve(data) => {
                     if let Some(TransactionEvent::Deposit(target_tx)) =
                         history.retrieve(data.target_tx)
-                        && self.disputed_transactions.contains(&data.target_tx) {
-                            self.disputed_transactions.remove(&data.target_tx);
-                            self.available += target_tx.amount;
-                            self.held -= target_tx.amount;
-                        }
+                        && self.disputed_transactions.contains(&data.target_tx)
+                    {
+                        self.disputed_transactions.remove(&data.target_tx);
+                        self.available += target_tx.amount;
+                        self.held -= target_tx.amount;
+                    }
                     // Assuming that the event was issues by mistake if the transaction is not in
                     // the history or not under dispute
                     //
@@ -70,10 +96,11 @@ impl ClientData {
                 DisputeEvent::Chargeback(data) => {
                     if let Some(TransactionEvent::Deposit(target_tx)) =
                         history.retrieve(data.target_tx)
-                        && self.disputed_transactions.contains(&data.target_tx) {
-                            self.held -= target_tx.amount;
-                            self.locked = true;
-                        }
+                        && self.disputed_transactions.contains(&data.target_tx)
+                    {
+                        self.held -= target_tx.amount;
+                        self.locked = true;
+                    }
                     // Assuming that the event was issues by mistake if the transaction is not in
                     // the history or not under dispute
                 }

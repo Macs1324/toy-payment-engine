@@ -1,11 +1,11 @@
 use crate::{
     ClientId,
+    client::ClientData,
     error::PaymentError,
     event::{DisputeData, DisputeEvent, Event, TransactionData, TransactionEvent, TransactionId},
 };
 
 pub type EventCsvRecord = (String, ClientId, TransactionId, Option<f32>);
-
 impl TryFrom<EventCsvRecord> for Event {
     type Error = PaymentError;
     fn try_from(value: EventCsvRecord) -> Result<Self, Self::Error> {

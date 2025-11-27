@@ -1,13 +1,8 @@
-use std::error::Error;
+use std::{error::Error, io::Write};
 
 use csv::ReaderBuilder;
 
-use crate::{
-    error::PaymentError,
-    event::Event,
-    io::EventCsvRecord,
-    state::State,
-};
+use crate::{error::PaymentError, event::Event, io::EventCsvRecord, state::State};
 
 pub mod client;
 pub mod error;
@@ -35,8 +30,22 @@ fn main() -> Result<(), Box<dyn Error>> {
         let event: Event = record.try_into()?;
 
         state.apply_event(&event)?;
-        dbg!(&state);
     }
+
+    let clients = state.dump_clients();
+
+    std::io::stdout().write("client,available,held,total,locked\n".as_bytes());
+    for client in clients {
+        std::io::stdout().write_fmt(format_args!(
+            "{},{},{},{},{}\n",
+            client.id(),
+            client.available_amount(),
+            client.held_amount(),
+            client.total_amount(),
+            client.is_locked()
+        ));
+    }
+    std::io::stdout().flush();
 
     Ok(())
 }

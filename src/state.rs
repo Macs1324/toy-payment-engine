@@ -31,7 +31,7 @@ impl State {
         let client_data = self
             .clients
             .entry(client_id)
-            .or_default();
+            .or_insert(ClientData::new(client_id));
 
         client_data.apply_event(event, &self.history)?;
 
@@ -40,6 +40,10 @@ impl State {
         }
 
         Ok(())
+    }
+
+    pub fn dump_clients(&self) -> Vec<ClientData> {
+        self.clients.values().cloned().collect()
     }
 }
 
