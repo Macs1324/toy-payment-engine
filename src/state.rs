@@ -6,6 +6,7 @@ use crate::{
     error::Result,
     event::{Event, TransactionEvent, TransactionId},
 };
+#[derive(Debug)]
 pub struct State {
     clients: HashMap<ClientId, ClientData>,
     history: TransactionHistory,
@@ -36,6 +37,7 @@ impl State {
     }
 }
 
+#[derive(Debug)]
 pub struct TransactionHistory {
     // Storing it as a hashmap since it doesn't look like there is a need to keep the transactions
     // chronologically "sorted", instead we just need the distinction whether or not a transaction

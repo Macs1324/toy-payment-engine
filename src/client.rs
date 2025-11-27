@@ -4,7 +4,7 @@ use crate::error::Result;
 use crate::event::{DisputeEvent, Event, TransactionEvent, TransactionId};
 use crate::state::TransactionHistory;
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct ClientData {
     available: f32,
     held: f32,
