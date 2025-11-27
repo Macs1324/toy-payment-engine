@@ -56,13 +56,11 @@ impl ClientData {
                 DisputeEvent::Resolve(data) => {
                     if let Some(TransactionEvent::Deposit(target_tx)) =
                         history.retrieve(data.target_tx)
-                    {
-                        if self.disputed_transactions.contains(&data.target_tx) {
+                        && self.disputed_transactions.contains(&data.target_tx) {
                             self.disputed_transactions.remove(&data.target_tx);
                             self.available += target_tx.amount;
                             self.held -= target_tx.amount;
                         }
-                    }
                     // Assuming that the event was issues by mistake if the transaction is not in
                     // the history or not under dispute
                     //
@@ -72,12 +70,10 @@ impl ClientData {
                 DisputeEvent::Chargeback(data) => {
                     if let Some(TransactionEvent::Deposit(target_tx)) =
                         history.retrieve(data.target_tx)
-                    {
-                        if self.disputed_transactions.contains(&data.target_tx) {
+                        && self.disputed_transactions.contains(&data.target_tx) {
                             self.held -= target_tx.amount;
                             self.locked = true;
                         }
-                    }
                     // Assuming that the event was issues by mistake if the transaction is not in
                     // the history or not under dispute
                 }

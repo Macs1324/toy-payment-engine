@@ -12,6 +12,12 @@ pub struct State {
     history: TransactionHistory,
 }
 
+impl Default for State {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl State {
     pub fn new() -> Self {
         Self {
@@ -25,7 +31,7 @@ impl State {
         let client_data = self
             .clients
             .entry(client_id)
-            .or_insert_with(ClientData::new);
+            .or_default();
 
         client_data.apply_event(event, &self.history)?;
 
@@ -43,6 +49,12 @@ pub struct TransactionHistory {
     // chronologically "sorted", instead we just need the distinction whether or not a transaction
     // has already happened. And lookups in a hashmap are faster than just doing linear search
     lookup: HashMap<TransactionId, TransactionEvent>,
+}
+
+impl Default for TransactionHistory {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl TransactionHistory {

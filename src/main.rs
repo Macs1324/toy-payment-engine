@@ -4,7 +4,7 @@ use csv::ReaderBuilder;
 
 use crate::{
     error::PaymentError,
-    event::{Event, TransactionId},
+    event::Event,
     io::EventCsvRecord,
     state::State,
 };
