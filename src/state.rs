@@ -24,12 +24,12 @@ impl State {
         let client_data = self
             .clients
             .entry(client_id)
-            .or_insert_with(|| ClientData::new());
+            .or_insert_with(ClientData::new);
 
         client_data.apply_event(event, &self.history)?;
 
         if let Event::Transaction(tx) = event {
-            self.history.append(&tx)?;
+            self.history.append(tx)?;
         }
 
         Ok(())
