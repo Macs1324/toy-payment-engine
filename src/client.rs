@@ -1,8 +1,8 @@
 use std::collections::HashSet;
 
 use crate::error::Result;
+use crate::event::{Event, TransactionId};
 use crate::state::TransactionHistory;
-use crate::transaction::{Transaction, TransactionId};
 
 pub struct ClientData {
     available: f32,
@@ -10,7 +10,7 @@ pub struct ClientData {
     locked: bool,
 
     // Keeps track of ongoing disputes
-    disputes: HashSet<TransactionId>,
+    disputed_transactions: HashSet<TransactionId>,
 }
 
 impl ClientData {
@@ -19,22 +19,12 @@ impl ClientData {
             available: 0.0f32,
             held: 0.0f32,
             locked: false,
-            disputes: HashSet::new(),
+            disputed_transactions: HashSet::new(),
         }
     }
 
-    pub fn apply_transaction(
-        &mut self,
-        transaction: &Transaction,
-        history: &TransactionHistory,
-    ) -> Result<()> {
-        match transaction {
-            Transaction::Deposit(tx) => {
-                self.available += tx.amount;
-            }
-            Transaction::Withdrawal(tx) => {
-                self.available -= tx.amount;
-            }
+    pub fn apply_event(&mut self, event: &Event, history: &TransactionHistory) -> Result<()> {
+        match event {
             _ => todo!(),
         };
         Ok(())
