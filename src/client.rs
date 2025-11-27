@@ -19,6 +19,7 @@ impl ClientData {
             available: 0.0f32,
             held: 0.0f32,
             locked: false,
+            disputes: HashSet::new(),
         }
     }
 

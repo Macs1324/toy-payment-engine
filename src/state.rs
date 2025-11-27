@@ -27,8 +27,9 @@ impl State {
             .or_insert_with(|| ClientData::new());
 
         client_data.apply_transaction(transaction, &self.history)?;
+        self.history.append(&transaction)?;
 
-        self.history.Ok(())
+        Ok(())
     }
 }
 
@@ -50,8 +51,17 @@ impl TransactionHistory {
         self.lookup.get(&transaction_id)
     }
 
-    pub fn append(&mut self, transaction_id: TransactionId, data: Transaction) -> Result<()> {
-        if let Some(existing_transaction) = self.lookup.insert(transaction_id, data) {
+    pub fn append(&mut self, tx: &Transaction) -> Result<()> {
+        let transaction_id = if let Some(id) = tx.get_id() {
+            id
+        } else {
+            // Skipping the transaction if it doesn't have an ID - basically operating under the assumption that
+            // only withdrawals and deposits are transactions that it makes sense to store in the
+            // history
+            // In a real-world scenario, this wouldn't be a silent thing
+            return Ok(());
+        };
+        if let Some(existing_transaction) = self.lookup.insert(transaction_id, tx.clone()) {
             // Something went wrong and we're ending up overwriting an existing transaction in the
             // history
             return Err(crate::error::PaymentError::OverwritingExistingTransaction {
